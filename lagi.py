@@ -692,7 +692,7 @@ with kanan:
     st.download_button(
         label="📥 Download Laporan PERKIN 2025",
         data=response.content,
-        file_name="PERKIN & REALISASI PER KAB_KOTA 2025.pdf",
+        file_name="PERKIN & REALISASI PER KAB_KOTA 2025.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True
     )
