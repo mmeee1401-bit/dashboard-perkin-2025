@@ -630,7 +630,7 @@ with right_chart:
 # ==========================================
 
 download_url = (
-    "https://drive.google.com/uc?export=download&id=1QnHMwTzoT5h8KePITyQH1-4IgnbwqDys"
+    "https://docs.google.com/spreadsheets/d/1hZO-KsjzZ0oyVgc4RtsMudXyuAhrQHF9/export?format=xlsx"
 )
 
 response = requests.get(download_url)
@@ -693,7 +693,7 @@ with kanan:
         label="📥 Download Laporan PERKIN 2025",
         data=response.content,
         file_name="PERKIN & REALISASI PER KAB_KOTA 2025.pdf",
-        mime="application/pdf",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True
     )
 
