@@ -394,7 +394,7 @@ with f2:
     color:#0B4EA2;
     margin-top:15px;
     margin-bottom:15px;">
-    📊 Pilih Indikator Sasaran
+    📊 Pilih Indikator 
     </div>
     """, unsafe_allow_html=True)
 
