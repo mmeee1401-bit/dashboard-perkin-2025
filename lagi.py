@@ -269,7 +269,7 @@ url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sh
 
 df = pd.read_csv(url)
 df.columns = df.columns.str.strip()
-df["Indikator"] = df["Indikator"].astype(str).str.strip()
+df["Indikator_Kinerja"] = df["Indikator_Kinerja"].astype(str).str.strip()
 df["Kabupaten"] = df["Kabupaten"].astype(str).str.strip()
 df["Target"] = pd.to_numeric(
     df["Target"],
@@ -367,7 +367,7 @@ with f2:
 
     df = pd.read_csv(url)
     df.columns = df.columns.str.strip() # Bersihkan nama kolom
-    df["Indikator"] = df["Indikator"].astype(str).str.strip() # Bersihkan kolom teks
+    df["Indikator_Kinerja"] = df["Indikator_Kinerja"].astype(str).str.strip() # Bersihkan kolom teks
     df["Kabupaten"] = df["Kabupaten"].astype(str).str.strip()
 
     df["Target"] = (
@@ -410,9 +410,9 @@ with f2:
     </div>
     """, unsafe_allow_html=True)
 
-    indikator = st.selectbox(
+    indikator_Kinerja = st.selectbox(
         "",
-        sorted(df["Indikator"].unique()),
+        sorted(df["Indikator_Kinerja"].unique()),
         label_visibility="collapsed"
     )
 
@@ -423,10 +423,10 @@ with f2:
 # =====================================================
 
 df_filter = df[
-    df["Indikator"] == indikator
+    df["Indikator_Kinerja"] == indikator_Kinerja
 ].copy()
 df_filter = df[
-    df["Indikator"] == indikator
+    df["Indikator_Kinerja"] == indikator_Kinerja
 ].copy()
 
 df_filter["Capaian"] = df_filter["Capaian"].fillna(0)
@@ -630,7 +630,7 @@ with right_chart:
 # ==========================================
 
 download_url = (
-    "https://docs.google.com/spreadsheets/d/1hZO-KsjzZ0oyVgc4RtsMudXyuAhrQHF9/export?format=xlsx"
+    "https://drive.google.com/uc?export=download&id=1QnHMwTzoT5h8KePITyQH1-4IgnbwqDys"
 )
 
 response = requests.get(download_url)
@@ -692,8 +692,8 @@ with kanan:
     st.download_button(
         label="📥 Download Laporan PERKIN 2025",
         data=response.content,
-        file_name="PERKIN & REALISASI PER KAB_KOTA 2025.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        file_name="PERKIN & REALISASI PER KAB_KOTA 2025.pdf",
+        mime="application/pdf",
         use_container_width=True
     )
 
