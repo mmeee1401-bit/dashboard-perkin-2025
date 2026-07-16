@@ -182,15 +182,29 @@ box-shadow:0 12px 28px rgba(0,0,0,.12);
 /* ===========================
 SELECTBOX
 =========================== */
+/* Box select utama */
 div[data-baseweb="select"]{
-background:white !important;
-border-radius:12px !important;
+    background:white !important;
+    border-radius:14px !important;
+    box-shadow:0 6px 18px rgba(0,0,0,.08);
 }
 
+/* Isi select */
 div[data-baseweb="select"] > div{
-background:white !important;
-border:1px solid #D9E2EF !important;
-border-radius:12px !important;
+    background:white !important;
+    border:1px solid #D9E2EF !important;
+    border-radius:14px !important;
+}
+
+/* Tambahan wrapper Streamlit */
+.stSelectbox > div > div{
+    background:white !important;
+    border-radius:14px !important;
+}
+
+/* Dropdown popup */
+div[data-baseweb="popover"]{
+    background:white !important;
 }
             
 /* ===========================
@@ -332,105 +346,127 @@ with col2:
     #</div>
     # """, unsafe_allow_html=True)
 
-# =====================================================
-# FILTER
-# =====================================================
-
 f1, f2 = st.columns(2)
 
+# =====================================================
+# PILIH BULAN
+# =====================================================
 with f1:
-    with st.container():
-        st.markdown("""
-        <div class="card">
-        """, unsafe_allow_html=True)
-        st.markdown("""
-        <div style="
-        font-size:30px;
-        font-weight:700;
-        color:#0B4EA2;
-        margin-bottom:15px;">
-        📅 Pilih Bulan
-        </h4>
-        """, unsafe_allow_html=True)
 
-        bulan = st.selectbox(
-            "",
-            list(bulan_sheet.keys()),
-            label_visibility="collapsed"
-        )
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-with f2:
-    nama_sheet = bulan_sheet[bulan]
-    url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/gviz/tq?tqx=out:csv&sheet={nama_sheet}"
-
-    df = pd.read_csv(url)
-    df.columns = df.columns.str.strip() # Bersihkan nama kolom
-    df["Indikator_Kinerja"] = df["Indikator_Kinerja"].astype(str).str.strip() # Bersihkan kolom teks
-    df["Kabupaten"] = df["Kabupaten"].astype(str).str.strip()
-
-    df["Target"] = (
-        df["Target"]
-        .astype(str)
-        .str.replace("%", "", regex=False)
-        .str.replace(",", ".", regex=False)
-        .str.strip()
-    )
-    df["Target"] = pd.to_numeric(df["Target"], errors="coerce")
-
-    df["Realisasi"] = (
-        df["Realisasi"]
-        .astype(str)
-        .str.replace("%", "", regex=False)
-        .str.replace(",", ".", regex=False)
-        .str.strip()
-    )
-    df["Realisasi"] = pd.to_numeric(df["Realisasi"], errors="coerce")
-
-    df["Capaian"] = (
-        df["Capaian"]
-        .astype(str)
-        .str.replace("%", "", regex=False)
-        .str.replace(",", ".", regex=False)
-        .str.strip()
-    )
-    df["Capaian"] = pd.to_numeric(df["Capaian"], errors="coerce")
-
+    # kotak biru
     st.markdown("""
-    <div class="card">
+    <div class="card"></div>
     """, unsafe_allow_html=True)
+
+    # tulisan di luar kotak
     st.markdown("""
     <div style="
     font-size:30px;
     font-weight:700;
     color:#0B4EA2;
+    margin-top:15px;
     margin-bottom:15px;">
-    📊 Pilih Indikator
+    📅 Pilih Bulan
     </div>
     """, unsafe_allow_html=True)
 
-    indikator_Kinerja = st.selectbox(
+    bulan = st.selectbox(
         "",
-        sorted(df["Indikator_Kinerja"].unique()),
+        list(bulan_sheet.keys()),
         label_visibility="collapsed"
     )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    info_bulan = st.empty()
+
+# =====================================================
+# PILIH INDIKATOR
+# =====================================================
+with f2:
+
+    st.markdown("""
+    <div class="card"></div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div style="
+    font-size:30px;
+    font-weight:700;
+    color:#0B4EA2;
+    margin-top:15px;
+    margin-bottom:15px;">
+    📊 Pilih Indikator Sasaran
+    </div>
+    """, unsafe_allow_html=True)
+
+    sasaran_kinerja = st.selectbox(
+        "Sasaran KInerja",
+        sorted(df["Sasaran_Kinerja"].dropna().unique())
+    )
+
+    kinerja = df[
+        df["Sasaran_Kinerja"] == sasaran_kinerja
+    ]
+
+    indikator = st.selectbox(
+        "Indikator Kinerja",
+        sorted(kinerja["Indikator_Kinerja"].dropna().unique())
+    )
 
 # =====================================================
 # FILTER DATA
 # =====================================================
-
-df_filter = df[
-    df["Indikator_Kinerja"] == indikator_Kinerja
-].copy()
-df_filter = df[
-    df["Indikator_Kinerja"] == indikator_Kinerja
+df_filter = kinerja[
+    kinerja["Indikator_Kinerja"] == indikator
 ].copy()
 
-df_filter["Capaian"] = df_filter["Capaian"].fillna(0)
+df_filter["Capaian"] = (
+    df_filter["Capaian"]
+    .astype(str)
+    .str.replace("%","", regex=False)
+    .str.replace(",",".", regex=False)
+)
 
+df_filter["Capaian"] = pd.to_numeric(
+    df_filter["Capaian"],
+    errors="coerce"
+).fillna(0)
+
+atas_target = (
+    df_filter["Capaian"] >= 100
+).sum()
+
+bawah_target = (
+    df_filter["Capaian"] < 100
+).sum()
+
+# MASUKKAN DI SINI
+with info_bulan.container():
+
+    st.markdown(f"""
+    <div style="
+    background:white;
+    padding:10px 14px;
+    border-radius:18px;
+    margin-top:12px;
+    box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    border:1px solid #EDF1F7;
+    ">
+
+    <div style="
+    font-size:13px;
+    color:#2E7D32;
+    margin-bottom:6px;">
+    🏆 <b>{atas_target}</b> Kabupaten/Kota di atas target
+    </div>
+
+    <div style="
+    font-size:13px;
+    color:#D32F2F;">
+    📉 <b>{bawah_target}</b> Kabupaten/Kota di bawah target
+    </div>
+
+    </div>
+    """, unsafe_allow_html=True)
 # =====================================================
 # KPI
 # =====================================================
@@ -444,7 +480,18 @@ if total_target > 0:
         total_realisasi / total_target * 100,
         2
     )
-jumlah_kab = df_filter["Kabupaten"].nunique()
+
+jumlah_lapor = (
+    df_filter[
+        df_filter["Realisasi"].fillna(0) > 0
+    ]["Kabupaten"]
+    .nunique()
+)
+
+total_kab = (
+    df_filter["Kabupaten"]
+    .nunique()
+)
 
 k1, k2, k3, k4 = st.columns(4)
 
@@ -476,8 +523,8 @@ with k3:
 
 with k4:
     st.metric(
-        label="🏛️ Kabupaten/Kota",
-        value=f"{jumlah_kab}"
+        label="🏛️ Jumlah Kabupaten/Kota yang Lapor",
+        value=f"{jumlah_lapor}/{total_kab}"
     )
 
 st.markdown("<br>", unsafe_allow_html=True)
@@ -545,9 +592,11 @@ with left_chart:
         plot_bgcolor="white",
         legend_title="",
         legend=dict(
-            orientation="h",
-            y=1.12,
-            x=0.18
+        orientation="h",
+            y=-0.25,
+            x=0.5,
+            xanchor="center",
+            yanchor="top"
         ),
         margin=dict(
             l=20,
@@ -585,45 +634,83 @@ with right_chart:
     color:#0B4EA2;
     margin-bottom:15px;">
     📈 Persentase Capaian
-    </h4>
+    </div>
     """, unsafe_allow_html=True)
 
+    max_capaian = df_filter["Capaian"].max()
+
     fig2 = px.bar(
-        df_filter.sort_values("Capaian", ascending=True),
+        df_filter.sort_values(
+            by="Capaian",
+            ascending=True
+        ),
+
         x="Capaian",
         y="Kabupaten",
+
         orientation="h",
+
         text="Capaian",
+
         color="Capaian",
+
         color_continuous_scale="Blues"
     )
 
     fig2.update_traces(
+
         texttemplate="%{text:.1f}%",
         textposition="outside",
+
         cliponaxis=False
     )
 
+    # garis target 100%
+    fig2.add_vline(
+        x=100,
+        line_dash="dash",
+        line_color="red",
+        annotation_text="100%"
+    )
+
     fig2.update_layout(
+
+        coloraxis_showscale=False,
+
         height=420,
+
         paper_bgcolor="white",
         plot_bgcolor="white",
-        coloraxis_showscale=False,
+
         margin=dict(
-            l=70,
-            r=80,
-            t=30,
+            l=20,
+            r=20,
+            t=20,
             b=20
         ),
-        xaxis_title="Persentase (%)",
+
+        xaxis=dict(
+            title="Persentase (%)",
+            range=[
+                0,
+                max(
+                    100,
+                    max_capaian + 10
+                )
+            ]
+        ),
+
         yaxis_title=""
     )
 
     st.plotly_chart(
         fig2,
         use_container_width=True,
-        config={"displayModeBar": False}
+        config={
+            "displayModeBar": False
+        }
     )
+
 
 # ==========================================
 # LINK DOWNLOAD EXCEL GOOGLE SHEETS
